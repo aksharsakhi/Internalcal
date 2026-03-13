@@ -217,7 +217,7 @@ class AmritaInternalCalculator {
           </td>
           <td>${comp.obtained} / ${comp.maxMarks}</td>
           <td>
-            <input type="number" step="0.5" class="ic-weight-input" 
+            <input type="number" step="0.5" min="0" class="ic-weight-input" 
                    data-sub="${subject.code}" data-comp-id="${comp.id}" 
                    value="${comp.weight}">
           </td>
