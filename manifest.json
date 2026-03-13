@@ -31,6 +31,9 @@
         "default_title": "InternalCalc"
     },
     "icons": {
-        "128": "icon128.png"
+        "16": "icons/icon16.jpeg",
+        "32": "icons/icon32.jpeg",
+        "48": "icons/icon48.jpeg",
+        "128": "icons/icon128.jpeg"
     }
 }
