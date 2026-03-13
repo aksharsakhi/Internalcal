@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        :root {
+            --ic-primary: #ff8c00;
+            --ic-bg: #121212;
+            --ic-text: #ffffff;
+            --ic-border: #333333;
+        }
+
+        body {
+            width: 300px;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--ic-bg);
+            color: var(--ic-text);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--ic-primary);
+        }
+
+        .btn {
+            background: var(--ic-primary);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .info {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 10px;
+            color: #444;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">InternalCalc</div>
+    </div>
+
+    <p class="info">
+        Navigate to the <b>Marks</b> section in the Amrita Student Portal to start calculating your internals.
+    </p>
+
+    <a href="https://students.amrita.edu/client/marks" target="_blank" class="btn">
+        Open Marks Page
+    </a>
+
+    <div class="info" style="margin-top: 10px; padding: 10px; background: #1e1e1e; border-radius: 6px;">
+        <b>How it works:</b><br>
+        • It scrapes marks automatically.<br>
+        • You can adjust the "Weight" (Converted To) for each exam.<br>
+        • Mid-terms default to 20.
+    </div>
+
+    <div class="footer">
+        &copy; 2026 InternalCalc Pro
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

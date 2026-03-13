@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+    "name": "InternalCalc",
+    "version": "1.0.0",
+    "description": "Smart internal marks calculator for Amrita students—instantly calculates weighted totals.",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://students.amrita.edu/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://students.amrita.edu/client/marks*",
+                "https://students.amrita.edu/client/mark*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "content.css"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "InternalCalc"
+    },
+    "icons": {
+        "128": "icon128.png"
+    }
+}

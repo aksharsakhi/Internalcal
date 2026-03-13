@@ -1,0 +1,195 @@
+/* InternalCalc - Floating Widget Styles */
+:root {
+    --ic-primary: #ff8c00;
+    /* Dark Orange */
+    --ic-primary-dark: #e67e00;
+    --ic-bg-dark: #121212;
+    --ic-bg-card: #1e1e1e;
+    --ic-text: #ffffff;
+    --ic-text-dim: #b0b0b0;
+    --ic-border: #333333;
+    --ic-success: #4caf50;
+}
+
+.ic-widget {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 450px !important;
+    max-height: 85vh !important;
+    background: var(--ic-bg-dark) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    z-index: 999999 !important;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    color: var(--ic-text) !important;
+    border: 1px solid var(--ic-border) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+}
+
+.ic-widget.minimized {
+    height: 50px !important;
+}
+
+.ic-header {
+    background: var(--ic-primary) !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    cursor: move !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.ic-header-title {
+    font-weight: 800 !important;
+    font-size: 18px !important;
+    color: #000 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.ic-controls {
+    display: flex !important;
+    gap: 8px !important;
+}
+
+.ic-btn {
+    background: rgba(0, 0, 0, 0.1) !important;
+    border: none !important;
+    color: #000 !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: bold !important;
+    transition: all 0.2s !important;
+}
+
+.ic-btn:hover {
+    background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.ic-content {
+    padding: 16px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+}
+
+.ic-subject-group {
+    background: var(--ic-bg-card) !important;
+    border-radius: 12px !important;
+    margin-bottom: 16px !important;
+    padding: 12px !important;
+    border: 1px solid var(--ic-border) !important;
+}
+
+.ic-subject-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid var(--ic-border) !important;
+    padding-bottom: 8px !important;
+}
+
+.ic-subject-info {
+    flex: 1 !important;
+}
+
+.ic-course-code {
+    font-size: 11px !important;
+    color: var(--ic-primary) !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+}
+
+.ic-course-name {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    margin: 2px 0 !important;
+}
+
+.ic-marks-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 8px !important;
+}
+
+.ic-marks-table th {
+    text-align: left !important;
+    font-size: 11px !important;
+    color: var(--ic-text-dim) !important;
+    padding: 4px !important;
+}
+
+.ic-marks-table td {
+    padding: 6px 4px !important;
+    font-size: 13px !important;
+}
+
+.ic-weight-input {
+    width: 45px !important;
+    background: #2a2a2a !important;
+    border: 1px solid var(--ic-border) !important;
+    color: var(--ic-primary) !important;
+    border-radius: 4px !important;
+    padding: 2px 4px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    text-align: center !important;
+}
+
+.ic-result-container {
+    margin-top: 12px !important;
+    padding-top: 12px !important;
+    border-top: 1px dashed var(--ic-border) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.ic-total-label {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.ic-total-value {
+    font-size: 24px !important;
+    font-weight: 900 !important;
+    color: var(--ic-primary) !important;
+}
+
+.ic-empty {
+    text-align: center !important;
+    padding: 40px 20px !important;
+}
+
+.ic-empty-icon {
+    font-size: 40px !important;
+    margin-bottom: 10px !important;
+    opacity: 0.5 !important;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        transform: translateX(500px);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.ic-widget-enter {
+    animation: slideIn 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards !important;
+}
