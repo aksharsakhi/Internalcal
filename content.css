@@ -176,6 +176,7 @@
     cursor: text !important;
     -moz-appearance: textfield !important;
     -webkit-appearance: none !important;
+    appearance: none !important;
 }
 
 /* Hide number input spinners */

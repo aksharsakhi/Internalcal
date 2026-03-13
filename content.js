@@ -29,13 +29,22 @@ class AmritaInternalCalculator {
     setupObserver() {
         const observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
+                // SKIP mutations caused by our own widget
+                if (this.widget && this.widget.contains(mutation.target)) continue;
+
                 if (mutation.type === 'childList') {
                     const table = document.querySelector('table');
                     if (table && table.innerText.includes('Marks Obtained')) {
                         clearTimeout(this.scrapeTimeout);
                         this.scrapeTimeout = setTimeout(() => {
+                            // Don't update if user is currently editing a weight
+                            const activeEl = document.activeElement;
+                            const isEditing = activeEl && activeEl.classList && activeEl.classList.contains('ic-weight-input');
+
                             this.scrapeMarks();
-                            this.updateWidget();
+                            if (!isEditing) {
+                                this.updateWidget();
+                            }
                         }, 1000);
                         break;
                     }
