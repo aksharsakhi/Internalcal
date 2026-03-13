@@ -250,6 +250,16 @@
     opacity: 0.5 !important;
 }
 
+.ic-wishes {
+    text-align: center !important;
+    font-size: 11px !important;
+    color: var(--ic-text-dim) !important;
+    margin-top: 20px !important;
+    padding-bottom: 10px !important;
+    font-style: italic !important;
+    opacity: 0.8 !important;
+}
+
 /* Animations */
 @keyframes slideIn {
     from {

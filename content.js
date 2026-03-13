@@ -197,6 +197,7 @@ class AmritaInternalCalculator {
       </div>
       <div class="ic-content">
         ${contentHtml}
+        <div class="ic-wishes">All the best for your exams! 🍀</div>
       </div>
     `;
     }
