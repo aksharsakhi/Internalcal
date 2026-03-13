@@ -219,7 +219,8 @@ class AmritaInternalCalculator {
           <td>
             <input type="number" step="0.5" min="0" class="ic-weight-input" 
                    data-sub="${subject.code}" data-comp-id="${comp.id}" 
-                   value="${comp.weight}">
+                   value="${comp.weight}"
+                   placeholder="0">
           </td>
           <td class="ic-comp-score" data-comp-id="${comp.id}" style="text-align: right; font-weight: bold; color: var(--ic-primary);">
             ${weighted.toFixed(2)}
@@ -303,10 +304,24 @@ class AmritaInternalCalculator {
     attachInputEvents() {
         const inputs = this.widget.querySelectorAll('.ic-weight-input');
         inputs.forEach(input => {
+            // Select all text on focus for easier typing
+            input.onfocus = (e) => {
+                e.target.select();
+            };
+
+            // Allow typing numbers, decimals, and prevent E/e
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') e.target.blur();
+                if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+            };
+
             input.oninput = (e) => {
                 const subCode = e.target.dataset.sub;
                 const compId = e.target.dataset.compId;
-                const newWeight = parseFloat(e.target.value) || 0;
+
+                // Don't calculate if empty, but update internal weight
+                const rawValue = e.target.value;
+                const newWeight = parseFloat(rawValue) || 0;
 
                 const sub = this.subjects[subCode];
                 if (!sub) return;
