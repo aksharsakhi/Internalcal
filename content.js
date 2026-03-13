@@ -106,13 +106,24 @@ class AmritaInternalCalculator {
                 defaultWeight = 5;
             }
 
+            // PRESERVE USER WEIGHT IF IT EXISTS
+            const existingSub = this.subjects[courseCode];
+            if (existingSub) {
+                const existingComp = existingSub.components.find(c =>
+                    c.examName === examName && c.componentName === componentName
+                );
+                if (existingComp && existingComp.weight !== undefined) {
+                    defaultWeight = existingComp.weight;
+                }
+            }
+
             newSubjects[courseCode].components.push({
                 id: `${courseCode}-${index}`,
                 examName,
                 componentName,
                 obtained,
                 maxMarks,
-                weight: defaultWeight // This will be the "Converted To" value
+                weight: defaultWeight
             });
         });
 
@@ -188,7 +199,7 @@ class AmritaInternalCalculator {
                    data-sub="${subject.code}" data-comp-id="${comp.id}" 
                    value="${comp.weight}">
           </td>
-          <td style="text-align: right; font-weight: bold; color: var(--ic-primary);">
+          <td class="ic-comp-score" data-comp-id="${comp.id}" style="text-align: right; font-weight: bold; color: var(--ic-primary);">
             ${weighted.toFixed(2)}
           </td>
         </tr>
@@ -196,7 +207,7 @@ class AmritaInternalCalculator {
         });
 
         return `
-      <div class="ic-subject-group">
+      <div class="ic-subject-group" data-sub-code="${subject.code}">
         <div class="ic-subject-header">
           <div class="ic-subject-info">
             <div class="ic-course-code">${subject.code}</div>
@@ -267,10 +278,29 @@ class AmritaInternalCalculator {
                 const compId = e.target.dataset.compId;
                 const newWeight = parseFloat(e.target.value) || 0;
 
-                const comp = this.subjects[subCode].components.find(c => c.id === compId);
+                const sub = this.subjects[subCode];
+                if (!sub) return;
+
+                const comp = sub.components.find(c => c.id === compId);
                 if (comp) {
                     comp.weight = newWeight;
-                    this.updateWidget(); // Refresh to show new total
+
+                    // Update ONLY the specific score display and the total
+                    const rowScore = (comp.obtained / comp.maxMarks) * newWeight;
+                    const scoreElem = this.widget.querySelector(`.ic-comp-score[data-comp-id="${compId}"]`);
+                    if (scoreElem) scoreElem.textContent = rowScore.toFixed(2);
+
+                    // Update subject total
+                    let newTotal = 0;
+                    sub.components.forEach(c => {
+                        newTotal += (c.obtained / c.maxMarks) * c.weight;
+                    });
+
+                    const subGroup = this.widget.querySelector(`.ic-subject-group[data-sub-code="${subCode}"]`);
+                    if (subGroup) {
+                        const totalElem = subGroup.querySelector('.ic-total-value');
+                        if (totalElem) totalElem.textContent = newTotal.toFixed(2);
+                    }
                 }
             };
         });
