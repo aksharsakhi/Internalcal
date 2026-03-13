@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
             --ic-primary: #007bff;
@@ -13,7 +15,7 @@
         body {
             width: 300px;
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--ic-bg);
             color: var(--ic-text);
             display: flex;
@@ -36,7 +38,7 @@
 
         .btn {
             background: var(--ic-primary);
-            color: #000;
+            color: #ffffff;
             border: none;
             padding: 12px;
             border-radius: 8px;
@@ -45,7 +47,12 @@
             text-align: center;
             text-decoration: none;
             margin-bottom: 10px;
-            transition: transform 0.1s;
+            transition: transform 0.1s, background-color 0.2s;
+            display: block;
+        }
+
+        .btn:hover {
+            background-color: var(--ic-primary-dark, #0056b3);
         }
 
         .btn:active {
@@ -53,18 +60,45 @@
         }
 
         .info {
-            font-size: 12px;
-            color: #888;
+            font-size: 13px;
+            color: #b0b0b0;
             line-height: 1.5;
         }
 
         .footer {
             margin-top: 20px;
-            font-size: 10px;
-            color: #444;
+            font-size: 11px;
+            color: #555;
             text-align: center;
         }
+
+        .usage-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: #161616;
+            border-radius: 8px;
+            border: 1px solid var(--ic-border);
+        }
+
+        .usage-title {
+            font-weight: bold;
+            color: var(--ic-primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .usage-list {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 12px;
+            color: #d0d0d0;
+        }
+
+        .usage-list li {
+            margin-bottom: 6px;
+        }
     </style>
+    <title>InternalCalc Popup</title>
 </head>
 
 <body>
@@ -73,18 +107,19 @@
     </div>
 
     <p class="info">
-        Navigate to the <b>Marks</b> section in the Amrita Student Portal to start calculating your internals.
+        Navigate to the <strong>Marks</strong> section in the Amrita Student Portal to start calculating your internals.
     </p>
 
-    <a href="https://students.amrita.edu/client/marks" target="_blank" class="btn">
+    <button id="open-marks-btn" class="btn">
         Open Marks Page
-    </a>
+    </button>
 
-    <div class="info" style="margin-top: 10px; padding: 10px; background: #1e1e1e; border-radius: 6px;">
-        <b>How it works:</b><br>
-        • It scrapes marks automatically.<br>
-        • You can adjust the "Weight" (Converted To) for each exam.<br>
-        • Mid-terms default to 20.
+    <div class="usage-box">
+        <div class="usage-title">How it works:</div>
+        <ul class="usage-list">
+            <li>It scrapes marks automatically.</li>
+            <li>You can adjust the "Weight" (Converted To) for each exam.</li>
+        </ul>
     </div>
 
     <div class="footer">
