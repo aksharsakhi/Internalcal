@@ -82,7 +82,8 @@ No more manual spreadsheets. No more guessing your internals. Just open the port
 - Click **(+)** to expand it back.
 
 ### 🔗 Quick Access
-- **Popup** with one-click navigation to the Marks page.
+- **Popup** with step-by-step instructions.
+- **Toggle Widget** button to show/hide the calculator.
 - **GitHub link** directly in the widget header for quick access to the source code.
 
 ---
@@ -144,7 +145,7 @@ InternalCalc/
 |-----------|----------------|
 | `activeTab` | To access the current tab's content |
 | `storage` | To save weights and theme preferences |
-| `tabs` | To open the Marks page from the popup |
+| `tabs` | To manage tabs from the popup |
 | `host_permissions: students.amrita.edu` | To run the content script on the portal |
 
 ---
@@ -162,13 +163,17 @@ InternalCalc/
 
 ---
 
-## � Contributors
+## 👥 Contributors
 
-- **[aksharsakhi](https://github.com/aksharsakhi)** — Lead Developer & Designer
+InternalCalc is an open-source project! We welcome contributions from the community. Feel free to:
+
+- 🐛 **Report bugs** via [Issues](https://github.com/aksharsakhi/Internalcal/issues)
+- 💡 **Suggest new features** or UI improvements
+- 🔧 **Submit Pull Requests** with fixes or enhancements
 
 ---
 
-## �📜 License
+## 📜 License
 
 This project is open source under the [MIT License](LICENSE).
 
