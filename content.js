@@ -6,7 +6,8 @@
 class AmritaInternalCalculator {
     constructor() {
         this.subjects = {}; // Grouped by courseCode
-        this.savedWeights = {}; // Persisted weights: key = "courseCode|examName|componentName"
+        this.savedWeights = {}; // Persisted weights
+        this.currentTerm = 'default'; // Academic term detected from page
         this.widget = null;
         this.isMinimized = false;
         this.theme = 'dark';
@@ -38,9 +39,19 @@ class AmritaInternalCalculator {
                             const activeEl = document.activeElement;
                             const isEditing = activeEl && activeEl.classList && activeEl.classList.contains('ic-weight-input');
 
-                            this.scrapeMarks();
-                            if (!isEditing) {
-                                this.updateWidget();
+                            // Re-detect term in case user switched semester
+                            const newTerm = this._detectAcademicTerm();
+                            if (newTerm !== this.currentTerm) {
+                                this.currentTerm = newTerm;
+                                this.loadSavedWeights().then(() => {
+                                    this.scrapeMarks();
+                                    this.updateWidget();
+                                });
+                            } else {
+                                this.scrapeMarks();
+                                if (!isEditing) {
+                                    this.updateWidget();
+                                }
                             }
                         }, 1000);
                         break;
@@ -54,6 +65,50 @@ class AmritaInternalCalculator {
 
     // ─── Storage Helpers ──────────────────────────────────────
 
+    _detectAcademicTerm() {
+        // Try to find the academic term selector/text on the page
+        // Common selectors on the Amrita portal
+        const selectors = [
+            'select option[selected]',
+            '.selected-term',
+            '.academic-term',
+            'select[name*="term"] option[selected]',
+            'select[name*="period"] option[selected]',
+            'select[name*="semester"] option[selected]'
+        ];
+
+        for (const sel of selectors) {
+            const el = document.querySelector(sel);
+            if (el && el.textContent.trim()) {
+                return el.textContent.trim();
+            }
+        }
+
+        // Fallback: check all select elements for a term-like value
+        const allSelects = document.querySelectorAll('select');
+        for (const select of allSelects) {
+            const selected = select.options[select.selectedIndex];
+            if (selected && selected.textContent.match(/\d{4}/)) {
+                return selected.textContent.trim();
+            }
+        }
+
+        // Also check for any visible text containing year patterns like "2024-25"
+        const spans = document.querySelectorAll('span, div, p, label');
+        for (const span of spans) {
+            const text = span.textContent.trim();
+            if (text.match(/^\d{4}-\d{2}\s+(Odd|Even|Spring|Fall|Summer|Winter)/i) && text.length < 30) {
+                return text;
+            }
+        }
+
+        return 'default';
+    }
+
+    _storageKey() {
+        return `ic_weights_${this.currentTerm}`;
+    }
+
     _weightKey(courseCode, examName, componentName) {
         return `${courseCode}|${examName}|${componentName}`;
     }
@@ -61,8 +116,11 @@ class AmritaInternalCalculator {
     async loadSavedWeights() {
         return new Promise((resolve) => {
             if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-                chrome.storage.local.get(['ic_weights'], (result) => {
-                    this.savedWeights = result.ic_weights || {};
+                // Detect term first
+                this.currentTerm = this._detectAcademicTerm();
+                const key = this._storageKey();
+                chrome.storage.local.get([key], (result) => {
+                    this.savedWeights = result[key] || {};
                     resolve();
                 });
             } else {
@@ -73,14 +131,15 @@ class AmritaInternalCalculator {
 
     saveWeightsToStorage() {
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.set({ ic_weights: this.savedWeights });
+            const key = this._storageKey();
+            chrome.storage.local.set({ [key]: this.savedWeights });
         }
     }
 
     clearSavedWeights() {
         this.savedWeights = {};
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.remove('ic_weights');
+            chrome.storage.local.remove(this._storageKey());
         }
         // Re-scrape with defaults and rebuild
         this.subjects = {};
