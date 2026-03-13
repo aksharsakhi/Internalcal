@@ -171,7 +171,3 @@ This project is open source under the [MIT License](LICENSE).
 <p align="center">
   <em>All the best for your exams! 🍀</em>
 </p>
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/aksharsakhi">aksharsakhi</a>
-</p>
