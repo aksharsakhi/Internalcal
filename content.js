@@ -24,6 +24,27 @@ class AmritaInternalCalculator {
         });
 
         this.setupObserver();
+        this.setupMessageListener();
+    }
+
+    setupMessageListener() {
+        chrome.runtime.onMessage.addListener((message) => {
+            if (message.action === 'toggleWidget') {
+                this.toggleWidget();
+            }
+        });
+    }
+
+    toggleWidget() {
+        if (this.widget && this.widget.parentNode) {
+            // Widget exists — hide it
+            this.widget.remove();
+            this.widget = null;
+        } else {
+            // Widget hidden — recreate it
+            this.scrapeMarks();
+            this.createWidget();
+        }
     }
 
     setupObserver() {

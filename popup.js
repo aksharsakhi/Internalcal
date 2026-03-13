@@ -1,8 +1,13 @@
 /**
  * InternalCalc - Popup Script
- * Handles navigation to the Amrita Student Portal Marks page.
+ * Sends a message to the content script to toggle the widget on/off.
  */
 
-document.getElementById('open-marks-btn').addEventListener('click', function () {
-    chrome.tabs.create({ url: 'https://students.amrita.edu/client/marks' });
+document.getElementById('toggle-widget-btn').addEventListener('click', function () {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleWidget' });
+            window.close();
+        }
+    });
 });

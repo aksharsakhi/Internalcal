@@ -27,7 +27,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .logo {
@@ -46,7 +46,6 @@
             font-size: 14px;
             cursor: pointer;
             text-align: center;
-            text-decoration: none;
             margin-bottom: 10px;
             transition: transform 0.1s, background-color 0.2s;
             display: block;
@@ -61,43 +60,52 @@
             transform: scale(0.98);
         }
 
-        .info {
-            font-size: 13px;
-            color: #b0b0b0;
-            line-height: 1.5;
-        }
-
-        .footer {
-            margin-top: 20px;
-            font-size: 11px;
-            color: #555;
-            text-align: center;
-        }
-
-        .usage-box {
-            margin-top: 15px;
+        .steps-box {
             padding: 12px;
             background: #161616;
             border-radius: 8px;
             border: 1px solid var(--ic-border);
+            margin-bottom: 14px;
         }
 
-        .usage-title {
+        .steps-title {
             font-weight: bold;
             color: var(--ic-primary);
             margin-bottom: 8px;
             font-size: 14px;
         }
 
-        .usage-list {
+        .steps-list {
             margin: 0;
             padding-left: 18px;
             font-size: 12px;
             color: #d0d0d0;
+            line-height: 1.7;
         }
 
-        .usage-list li {
-            margin-bottom: 6px;
+        .steps-list li {
+            margin-bottom: 4px;
+        }
+
+        .url-box {
+            background: #1a1a1a;
+            border: 1px solid var(--ic-border);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 11px;
+            color: var(--ic-primary);
+            font-family: monospace;
+            word-break: break-all;
+            margin: 8px 0;
+            user-select: all;
+            cursor: text;
+        }
+
+        .footer {
+            margin-top: 16px;
+            font-size: 11px;
+            color: #555;
+            text-align: center;
         }
     </style>
     <title>InternalCalc Popup</title>
@@ -108,23 +116,23 @@
         <div class="logo">InternalCalc</div>
     </div>
 
-    <p class="info">
-        Navigate to the <strong>Marks</strong> section in the Amrita Student Portal to start calculating your internals.
-    </p>
-
-    <button id="open-marks-btn" class="btn">
-        Open Marks Page
-    </button>
-
-    <div class="usage-box">
-        <div class="usage-title">How it works:</div>
-        <ul class="usage-list">
-            <li>It scrapes marks automatically.</li>
-            <li>You can adjust the "Weight" (Converted To) for each exam.</li>
-            <li>Click on any weight to type a new value.</li>
-            <li>Use arrow keys to increment/decrement by 1.</li>
-        </ul>
+    <div class="steps-box">
+        <div class="steps-title">How to use:</div>
+        <ol class="steps-list">
+            <li>Log in to the <strong>Amrita Student Portal</strong></li>
+            <li>Go to the <strong>Marks</strong> page:</li>
+        </ol>
+        <div class="url-box">students.amrita.edu/client/marks</div>
+        <ol class="steps-list" start="3">
+            <li>The widget appears <strong>automatically</strong></li>
+            <li>Adjust weights for each assessment</li>
+            <li>Your internals are calculated <strong>live</strong></li>
+        </ol>
     </div>
+
+    <button id="toggle-widget-btn" class="btn">
+        Toggle InternalCalc Widget
+    </button>
 
     <div class="footer">
         <div style="font-style: italic; margin-bottom: 4px; color: #888;">All the best for your exams! &#127808;</div>
