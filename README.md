@@ -162,16 +162,6 @@ InternalCalc/
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-
-- 🐛 Report bugs via [Issues](https://github.com/aksharsakhi/Internalcal/issues)
-- 💡 Suggest features
-- 🔧 Submit pull requests
-
----
-
 ## 📜 License
 
 This project is open source under the [MIT License](LICENSE).
