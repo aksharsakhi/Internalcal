@@ -1,14 +1,14 @@
 /* InternalCalc - Floating Widget Styles */
 :root {
-    --ic-primary: #ff8c00;
-    /* Dark Orange */
-    --ic-primary-dark: #e67e00;
-    --ic-bg-dark: #121212;
-    --ic-bg-card: #1e1e1e;
+    --ic-primary: #007bff;
+    /* Bright Blue */
+    --ic-primary-dark: #0056b3;
+    --ic-bg-dark: #0a0a0a;
+    --ic-bg-card: #161616;
     --ic-text: #ffffff;
-    --ic-text-dim: #b0b0b0;
-    --ic-border: #333333;
-    --ic-success: #4caf50;
+    --ic-text-dim: #a0a0a0;
+    --ic-border: #2a2a2a;
+    --ic-success: #28a745;
 }
 
 .ic-widget {
@@ -137,15 +137,38 @@
 }
 
 .ic-weight-input {
-    width: 45px !important;
-    background: #2a2a2a !important;
+    width: 50px !important;
+    background: #252525 !important;
     border: 1px solid var(--ic-border) !important;
     color: var(--ic-primary) !important;
-    border-radius: 4px !important;
+    border-radius: 6px !important;
     padding: 2px 4px !important;
-    font-size: 12px !important;
-    font-weight: bold !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
     text-align: center !important;
+    outline: none !important;
+    transition: border-color 0.2s !important;
+}
+
+.ic-weight-input:focus {
+    border-color: var(--ic-primary) !important;
+}
+
+.ic-github-link {
+    color: #000 !important;
+    text-decoration: none !important;
+    font-size: 11px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    opacity: 0.7 !important;
+    transition: opacity 0.2s !important;
+    font-weight: 600 !important;
+    margin-left: 8px !important;
+}
+
+.ic-github-link:hover {
+    opacity: 1 !important;
 }
 
 .ic-result-container {

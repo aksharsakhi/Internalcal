@@ -97,8 +97,13 @@ class AmritaInternalCalculator {
 
             // Default weight logic
             let defaultWeight = maxMarks;
-            if (examName.toLowerCase().includes('mid-term') || componentName.toLowerCase().includes('mid-term')) {
+            const lowerExam = examName.toLowerCase();
+            const lowerComp = componentName.toLowerCase();
+
+            if (lowerExam.includes('mid-term') || lowerComp.includes('mid-term')) {
                 defaultWeight = 20;
+            } else if (lowerExam.includes('quiz') || lowerComp.includes('quiz')) {
+                defaultWeight = 5;
             }
 
             newSubjects[courseCode].components.push({
@@ -147,6 +152,10 @@ class AmritaInternalCalculator {
       <div class="ic-header">
         <div class="ic-header-title">
           <span>InternalCalc</span>
+          <a href="https://github.com/aksharsakhi/Internalcal" target="_blank" class="ic-github-link">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+          </a>
         </div>
         <div class="ic-controls">
           <button class="ic-btn" id="ic-minimize" title="Minimize">−</button>
@@ -270,6 +279,7 @@ class AmritaInternalCalculator {
     makeDraggable(header) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         header.onmousedown = (e) => {
+            if (e.target.closest('a') || e.target.closest('button') || e.target.closest('input')) return;
             e.preventDefault();
             pos3 = e.clientX;
             pos4 = e.clientY;
@@ -283,8 +293,17 @@ class AmritaInternalCalculator {
                 pos2 = pos4 - e.clientY;
                 pos3 = e.clientX;
                 pos4 = e.clientY;
-                this.widget.style.top = (this.widget.offsetTop - pos2) + "px";
-                this.widget.style.left = (this.widget.offsetLeft - pos1) + "px";
+
+                let newTop = this.widget.offsetTop - pos2;
+                let newLeft = this.widget.offsetLeft - pos1;
+
+                // Clamp to viewport
+                const rect = this.widget.getBoundingClientRect();
+                newTop = Math.max(0, Math.min(newTop, window.innerHeight - 50));
+                newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
+
+                this.widget.style.top = newTop + "px";
+                this.widget.style.left = newLeft + "px";
                 this.widget.style.right = "auto";
             };
         };
