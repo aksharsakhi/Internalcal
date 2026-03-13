@@ -29,6 +29,19 @@ No more manual spreadsheets. No more guessing your internals. Just open the port
 
 ---
 
+## 🌐 Supported Browsers
+
+| Browser | Supported |
+|---------|-----------|
+| Google Chrome | ✅ |
+| Chrome Canary | ✅ |
+| Comit | ✅ |
+| Atlas | ✅ |
+
+> **Note:** Download and install from the [Chrome Web Store](https://chromewebstore.google.com/) only.
+
+---
+
 ## ✨ Features
 
 ### 🔍 Auto Scraping
@@ -44,7 +57,7 @@ No more manual spreadsheets. No more guessing your internals. Just open the port
 - **Quizzes** default to **5 marks**.
 - All other components default to their max marks.
 - **Click any weight** to type a custom value — works like a normal text box.
-- **Arrow keys** increment/decrement by **1** (no more 0.5 jumps).
+- **Arrow keys** increment/decrement by **1** (whole numbers).
 - Only valid numbers are accepted (digits and decimals only).
 
 ### 💾 Persistent Weight Storage
@@ -75,6 +88,13 @@ No more manual spreadsheets. No more guessing your internals. Just open the port
 ---
 
 ## 🚀 Installation
+
+### From Chrome Web Store (Recommended)
+
+1. Visit the [Chrome Web Store](https://chromewebstore.google.com/) and search for **InternalCalc**.
+2. Click **"Add to Chrome"**.
+3. Navigate to the [Amrita Student Portal — Marks Page](https://students.amrita.edu/client/marks).
+4. The **InternalCalc widget** will appear automatically! 🎉
 
 ### From Source (Developer Mode)
 
@@ -144,7 +164,7 @@ InternalCalc/
 |-----------|----------------|
 | `activeTab` | To access the current tab's content |
 | `storage` | To save weights and theme preferences |
-| `tabs` | To navigate to the Marks page from the popup |
+| `tabs` | To open the Marks page from the popup |
 | `host_permissions: students.amrita.edu` | To run the content script on the portal |
 
 ---
