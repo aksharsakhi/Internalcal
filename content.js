@@ -8,16 +8,18 @@ class AmritaInternalCalculator {
         this.subjects = {}; // Grouped by courseCode
         this.widget = null;
         this.isMinimized = false;
+        this.theme = 'dark'; // Default theme
         this.init();
     }
 
     init() {
-        // console.log('[InternalCalc] Initializing...');
-        this.waitForTable().then(() => {
-            this.scrapeMarks();
-            this.createWidget();
-        }).catch(err => {
-            // console.log('[InternalCalc] Table not found or error:', err);
+        this.loadTheme().then(() => {
+            this.waitForTable().then(() => {
+                this.scrapeMarks();
+                this.createWidget();
+            }).catch(err => {
+                // console.log('[InternalCalc] Table not found or error:', err);
+            });
         });
 
         // Watch for dynamic updates (e.g., when changing academic term)
@@ -44,6 +46,25 @@ class AmritaInternalCalculator {
         });
 
         observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    async loadTheme() {
+        return new Promise((resolve) => {
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+                chrome.storage.local.get(['theme'], (result) => {
+                    this.theme = result.theme || 'dark';
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    async saveTheme() {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            await chrome.storage.local.set({ theme: this.theme });
+        }
     }
 
     async waitForTable() {
@@ -134,7 +155,7 @@ class AmritaInternalCalculator {
         if (this.widget) this.widget.remove();
 
         this.widget = document.createElement('div');
-        this.widget.className = 'ic-widget ic-widget-enter';
+        this.widget.className = `ic-widget ic-widget-enter ${this.theme === 'light' ? 'light-mode' : ''}`;
         this.renderWidget();
         document.body.appendChild(this.widget);
 
@@ -169,6 +190,7 @@ class AmritaInternalCalculator {
           </a>
         </div>
         <div class="ic-controls">
+          <button class="ic-btn" id="ic-theme-toggle" title="Toggle Theme">${this.theme === 'light' ? '🌙' : '☀️'}</button>
           <button class="ic-btn" id="ic-minimize" title="Minimize">−</button>
           <button class="ic-btn" id="ic-close" title="Close">×</button>
         </div>
@@ -257,6 +279,14 @@ class AmritaInternalCalculator {
         const header = this.widget.querySelector('.ic-header');
         const minBtn = this.widget.querySelector('#ic-minimize');
         const closeBtn = this.widget.querySelector('#ic-close');
+        const themeBtn = this.widget.querySelector('#ic-theme-toggle');
+
+        themeBtn.onclick = () => {
+            this.theme = this.theme === 'light' ? 'dark' : 'light';
+            this.widget.classList.toggle('light-mode', this.theme === 'light');
+            themeBtn.textContent = this.theme === 'light' ? '🌙' : '☀️';
+            this.saveTheme();
+        };
 
         minBtn.onclick = () => {
             this.isMinimized = !this.isMinimized;

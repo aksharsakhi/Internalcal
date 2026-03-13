@@ -11,6 +11,15 @@
     --ic-success: #28a745;
 }
 
+/* Light Mode Overrides */
+.ic-widget.light-mode {
+    --ic-bg-dark: #f8f9fa;
+    --ic-bg-card: #ffffff;
+    --ic-text: #212529;
+    --ic-text-dim: #6c757d;
+    --ic-border: #dee2e6;
+}
+
 .ic-widget {
     position: fixed !important;
     top: 20px !important;
@@ -53,6 +62,10 @@
     gap: 8px !important;
 }
 
+.ic-widget.light-mode .ic-header-title {
+    color: #ffffff !important;
+}
+
 .ic-controls {
     display: flex !important;
     gap: 8px !important;
@@ -73,8 +86,17 @@
     transition: all 0.2s !important;
 }
 
+.ic-widget.light-mode .ic-btn {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
 .ic-btn:hover {
     background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.ic-widget.light-mode .ic-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
 }
 
 .ic-content {
@@ -118,6 +140,10 @@
     margin: 2px 0 !important;
 }
 
+.ic-widget.light-mode .ic-course-name {
+    color: #212529 !important;
+}
+
 .ic-marks-table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -150,6 +176,11 @@
     transition: border-color 0.2s !important;
 }
 
+.ic-widget.light-mode .ic-weight-input {
+    background: #ffffff !important;
+    border-color: #ced4da !important;
+}
+
 .ic-weight-input:focus {
     border-color: var(--ic-primary) !important;
 }
@@ -167,8 +198,16 @@
     margin-left: 8px !important;
 }
 
+.ic-widget.light-mode .ic-github-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
 .ic-github-link:hover {
     opacity: 1 !important;
+}
+
+.ic-widget.light-mode .ic-github-link:hover {
+    color: #ffffff !important;
 }
 
 .ic-result-container {
