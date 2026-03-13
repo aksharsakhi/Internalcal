@@ -30,10 +30,8 @@ class AmritaInternalCalculator {
         const observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 if (mutation.type === 'childList') {
-                    // Check if marks table was updated
                     const table = document.querySelector('table');
                     if (table && table.innerText.includes('Marks Obtained')) {
-                        // Throttled scrape
                         clearTimeout(this.scrapeTimeout);
                         this.scrapeTimeout = setTimeout(() => {
                             this.scrapeMarks();
@@ -74,7 +72,7 @@ class AmritaInternalCalculator {
 
             const check = () => {
                 const rows = document.querySelectorAll('table tr');
-                if (rows.length > 2) { // Header + at least one data row
+                if (rows.length > 2) {
                     resolve();
                 } else if (attempts < maxAttempts) {
                     attempts++;
@@ -96,7 +94,7 @@ class AmritaInternalCalculator {
         const newSubjects = {};
 
         rows.forEach((row, index) => {
-            if (index === 0) return; // Skip header
+            if (index === 0) return;
 
             const cells = row.querySelectorAll('td, th');
             if (cells.length < 6) return;
@@ -159,6 +157,11 @@ class AmritaInternalCalculator {
         this.renderWidget();
         document.body.appendChild(this.widget);
 
+        // Remove anim class after animation ends so it doesn't re-trigger on child changes
+        this.widget.addEventListener('animationend', () => {
+            this.widget.classList.remove('ic-widget-enter');
+        }, { once: true });
+
         this.attachEvents();
     }
 
@@ -218,7 +221,7 @@ class AmritaInternalCalculator {
           </td>
           <td>${comp.obtained} / ${comp.maxMarks}</td>
           <td>
-            <input type="number" step="0.5" min="0" class="ic-weight-input" 
+            <input type="text" inputmode="decimal" class="ic-weight-input" 
                    data-sub="${subject.code}" data-comp-id="${comp.id}" 
                    value="${comp.weight}"
                    placeholder="0">
@@ -273,6 +276,7 @@ class AmritaInternalCalculator {
                 contentHtml += this.generateSubjectCard(this.subjects[code]);
             });
         }
+        contentHtml += `<div class="ic-wishes">All the best for your exams! 🍀</div>`;
         content.innerHTML = contentHtml;
         this.attachInputEvents();
     }
@@ -305,24 +309,60 @@ class AmritaInternalCalculator {
     attachInputEvents() {
         const inputs = this.widget.querySelectorAll('.ic-weight-input');
         inputs.forEach(input => {
-            // Select all text on focus for easier typing
-            input.onfocus = (e) => {
+            // Click selects all text for easy replacement
+            input.onclick = (e) => {
                 e.target.select();
             };
 
-            // Allow typing numbers, decimals, and prevent E/e
+            // Double-click also selects all
+            input.ondblclick = (e) => {
+                e.target.select();
+            };
+
+            // Arrow keys for increment/decrement by 1
             input.onkeydown = (e) => {
-                if (e.key === 'Enter') e.target.blur();
-                if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+                if (e.key === 'Enter') {
+                    e.target.blur();
+                    return;
+                }
+
+                const currentVal = parseFloat(e.target.value) || 0;
+
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const newVal = currentVal + 1;
+                    e.target.value = newVal;
+                    e.target.dispatchEvent(new Event('input'));
+                    return;
+                }
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const newVal = Math.max(0, currentVal - 1);
+                    e.target.value = newVal;
+                    e.target.dispatchEvent(new Event('input'));
+                    return;
+                }
+
+                // Only allow: digits, decimal point, backspace, delete, tab, arrow left/right, home, end
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', '.'];
+                if (!allowed.includes(e.key) && !/^[0-9]$/.test(e.key)) {
+                    e.preventDefault();
+                }
+
+                // Prevent multiple decimals
+                if (e.key === '.' && e.target.value.includes('.')) {
+                    e.preventDefault();
+                }
             };
 
             input.oninput = (e) => {
                 const subCode = e.target.dataset.sub;
                 const compId = e.target.dataset.compId;
 
-                // Don't calculate if empty, but update internal weight
                 const rawValue = e.target.value;
-                const newWeight = parseFloat(rawValue) || 0;
+                // Allow empty during typing, treat as 0 for calc
+                const newWeight = rawValue === '' ? 0 : (parseFloat(rawValue) || 0);
 
                 const sub = this.subjects[subCode];
                 if (!sub) return;
@@ -373,7 +413,6 @@ class AmritaInternalCalculator {
                 let newTop = this.widget.offsetTop - pos2;
                 let newLeft = this.widget.offsetLeft - pos1;
 
-                // Clamp to viewport
                 const rect = this.widget.getBoundingClientRect();
                 newTop = Math.max(0, Math.min(newTop, window.innerHeight - 50));
                 newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
