@@ -96,26 +96,6 @@ No more manual spreadsheets. No more guessing your internals. Just open the port
 3. Navigate to the [Amrita Student Portal — Marks Page](https://students.amrita.edu/client/marks).
 4. The **InternalCalc widget** will appear automatically! 🎉
 
-### From Source (Developer Mode)
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/aksharsakhi/Internalcal.git
-   ```
-
-2. **Open Chrome** and navigate to:
-   ```
-   chrome://extensions/
-   ```
-
-3. **Enable Developer Mode** (toggle in the top right corner).
-
-4. Click **"Load unpacked"** and select the `InternalCalc` folder.
-
-5. Navigate to the [Amrita Student Portal — Marks Page](https://students.amrita.edu/client/marks).
-
-6. The **InternalCalc widget** will appear automatically in the top-right corner! 🎉
-
 ---
 
 ## 🛠️ How to Use
