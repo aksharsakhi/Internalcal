@@ -162,7 +162,13 @@ InternalCalc/
 
 ---
 
-## 📜 License
+## � Contributors
+
+- **[aksharsakhi](https://github.com/aksharsakhi)** — Lead Developer & Designer
+
+---
+
+## �📜 License
 
 This project is open source under the [MIT License](LICENSE).
 
