@@ -256,6 +256,29 @@
     opacity: 0.5 !important;
 }
 
+.ic-weight-saved {
+    border-color: rgba(40, 167, 69, 0.5) !important;
+}
+
+.ic-save-status {
+    text-align: center !important;
+    font-size: 11px !important;
+    color: var(--ic-success) !important;
+    padding: 4px 0 !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s !important;
+    font-weight: 600 !important;
+}
+
+.ic-btn-reset {
+    font-size: 16px !important;
+    color: #ff6b6b !important;
+}
+
+.ic-btn-reset:hover {
+    background: rgba(255, 107, 107, 0.15) !important;
+}
+
 .ic-wishes {
     text-align: center !important;
     font-size: 11px !important;

@@ -6,30 +6,28 @@
 class AmritaInternalCalculator {
     constructor() {
         this.subjects = {}; // Grouped by courseCode
+        this.savedWeights = {}; // Persisted weights: key = "courseCode|examName|componentName"
         this.widget = null;
         this.isMinimized = false;
-        this.theme = 'dark'; // Default theme
+        this.theme = 'dark';
         this.init();
     }
 
     init() {
-        this.loadTheme().then(() => {
+        // Load saved theme and weights first, then scrape and build
+        Promise.all([this.loadTheme(), this.loadSavedWeights()]).then(() => {
             this.waitForTable().then(() => {
                 this.scrapeMarks();
                 this.createWidget();
-            }).catch(err => {
-                // console.log('[InternalCalc] Table not found or error:', err);
-            });
+            }).catch(() => { });
         });
 
-        // Watch for dynamic updates (e.g., when changing academic term)
         this.setupObserver();
     }
 
     setupObserver() {
         const observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
-                // SKIP mutations caused by our own widget
                 if (this.widget && this.widget.contains(mutation.target)) continue;
 
                 if (mutation.type === 'childList') {
@@ -37,7 +35,6 @@ class AmritaInternalCalculator {
                     if (table && table.innerText.includes('Marks Obtained')) {
                         clearTimeout(this.scrapeTimeout);
                         this.scrapeTimeout = setTimeout(() => {
-                            // Don't update if user is currently editing a weight
                             const activeEl = document.activeElement;
                             const isEditing = activeEl && activeEl.classList && activeEl.classList.contains('ic-weight-input');
 
@@ -53,6 +50,42 @@ class AmritaInternalCalculator {
         });
 
         observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // ─── Storage Helpers ──────────────────────────────────────
+
+    _weightKey(courseCode, examName, componentName) {
+        return `${courseCode}|${examName}|${componentName}`;
+    }
+
+    async loadSavedWeights() {
+        return new Promise((resolve) => {
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+                chrome.storage.local.get(['ic_weights'], (result) => {
+                    this.savedWeights = result.ic_weights || {};
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    saveWeightsToStorage() {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ ic_weights: this.savedWeights });
+        }
+    }
+
+    clearSavedWeights() {
+        this.savedWeights = {};
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.remove('ic_weights');
+        }
+        // Re-scrape with defaults and rebuild
+        this.subjects = {};
+        this.scrapeMarks();
+        this.updateWidget();
     }
 
     async loadTheme() {
@@ -74,6 +107,8 @@ class AmritaInternalCalculator {
         }
     }
 
+    // ─── Table Detection ──────────────────────────────────────
+
     async waitForTable() {
         return new Promise((resolve, reject) => {
             let attempts = 0;
@@ -94,6 +129,8 @@ class AmritaInternalCalculator {
             check();
         });
     }
+
+    // ─── Scraping ─────────────────────────────────────────────
 
     scrapeMarks() {
         const table = document.querySelector('table');
@@ -134,14 +171,21 @@ class AmritaInternalCalculator {
                 defaultWeight = 5;
             }
 
-            // PRESERVE USER WEIGHT IF IT EXISTS
-            const existingSub = this.subjects[courseCode];
-            if (existingSub) {
-                const existingComp = existingSub.components.find(c =>
-                    c.examName === examName && c.componentName === componentName
-                );
-                if (existingComp && existingComp.weight !== undefined) {
-                    defaultWeight = existingComp.weight;
+            // 1st priority: SAVED weight from storage (persists across reload)
+            const wKey = this._weightKey(courseCode, examName, componentName);
+            if (this.savedWeights[wKey] !== undefined) {
+                defaultWeight = this.savedWeights[wKey];
+            }
+            // 2nd priority: Weight already in memory from current session
+            else {
+                const existingSub = this.subjects[courseCode];
+                if (existingSub) {
+                    const existingComp = existingSub.components.find(c =>
+                        c.examName === examName && c.componentName === componentName
+                    );
+                    if (existingComp && existingComp.weight !== undefined) {
+                        defaultWeight = existingComp.weight;
+                    }
                 }
             }
 
@@ -158,6 +202,8 @@ class AmritaInternalCalculator {
         this.subjects = newSubjects;
     }
 
+    // ─── Widget Creation ──────────────────────────────────────
+
     createWidget() {
         if (this.widget) this.widget.remove();
 
@@ -166,7 +212,6 @@ class AmritaInternalCalculator {
         this.renderWidget();
         document.body.appendChild(this.widget);
 
-        // Remove anim class after animation ends so it doesn't re-trigger on child changes
         this.widget.addEventListener('animationend', () => {
             this.widget.classList.remove('ic-widget-enter');
         }, { once: true });
@@ -176,6 +221,7 @@ class AmritaInternalCalculator {
 
     renderWidget() {
         const sortedCodes = Object.keys(this.subjects);
+        const hasSavedWeights = Object.keys(this.savedWeights).length > 0;
 
         let contentHtml = '';
         if (sortedCodes.length === 0) {
@@ -203,12 +249,14 @@ class AmritaInternalCalculator {
         </div>
         <div class="ic-controls">
           <button class="ic-btn" id="ic-theme-toggle" title="Toggle Theme">${this.theme === 'light' ? '🌙' : '☀️'}</button>
+          ${hasSavedWeights ? '<button class="ic-btn ic-btn-reset" id="ic-reset-weights" title="Reset all saved weights">↺</button>' : ''}
           <button class="ic-btn" id="ic-minimize" title="Minimize">−</button>
           <button class="ic-btn" id="ic-close" title="Close">×</button>
         </div>
       </div>
       <div class="ic-content">
         ${contentHtml}
+        <div class="ic-save-status" id="ic-save-status"></div>
         <div class="ic-wishes">All the best for your exams! 🍀</div>
       </div>
     `;
@@ -222,6 +270,10 @@ class AmritaInternalCalculator {
             const weighted = (comp.obtained / comp.maxMarks) * comp.weight;
             totalWeighted += weighted;
 
+            // Check if this weight is saved (to show a subtle indicator)
+            const wKey = this._weightKey(subject.code, comp.examName, comp.componentName);
+            const isSaved = this.savedWeights[wKey] !== undefined;
+
             componentsHtml += `
         <tr>
           <td>
@@ -230,8 +282,9 @@ class AmritaInternalCalculator {
           </td>
           <td>${comp.obtained} / ${comp.maxMarks}</td>
           <td>
-            <input type="text" inputmode="decimal" class="ic-weight-input" 
+            <input type="text" inputmode="decimal" class="ic-weight-input ${isSaved ? 'ic-weight-saved' : ''}" 
                    data-sub="${subject.code}" data-comp-id="${comp.id}" 
+                   data-exam="${comp.examName}" data-component="${comp.componentName}"
                    value="${comp.weight}"
                    placeholder="0">
           </td>
@@ -276,6 +329,8 @@ class AmritaInternalCalculator {
         const content = this.widget.querySelector('.ic-content');
         if (!content) return;
 
+        const hasSavedWeights = Object.keys(this.savedWeights).length > 0;
+
         let contentHtml = '';
         const sortedCodes = Object.keys(this.subjects);
         if (sortedCodes.length === 0) {
@@ -285,9 +340,41 @@ class AmritaInternalCalculator {
                 contentHtml += this.generateSubjectCard(this.subjects[code]);
             });
         }
+        contentHtml += `<div class="ic-save-status" id="ic-save-status"></div>`;
         contentHtml += `<div class="ic-wishes">All the best for your exams! 🍀</div>`;
         content.innerHTML = contentHtml;
+
+        // Update reset button visibility
+        const resetBtn = this.widget.querySelector('#ic-reset-weights');
+        if (hasSavedWeights && !resetBtn) {
+            const controls = this.widget.querySelector('.ic-controls');
+            const minBtn = this.widget.querySelector('#ic-minimize');
+            const btn = document.createElement('button');
+            btn.className = 'ic-btn ic-btn-reset';
+            btn.id = 'ic-reset-weights';
+            btn.title = 'Reset all saved weights';
+            btn.textContent = '↺';
+            btn.onclick = () => this.clearSavedWeights();
+            controls.insertBefore(btn, minBtn);
+        } else if (!hasSavedWeights && resetBtn) {
+            resetBtn.remove();
+        }
+
         this.attachInputEvents();
+    }
+
+    // ─── Event Handling ───────────────────────────────────────
+
+    showSaveStatus(msg) {
+        const el = this.widget.querySelector('#ic-save-status');
+        if (el) {
+            el.textContent = msg;
+            el.style.opacity = '1';
+            clearTimeout(this._saveStatusTimer);
+            this._saveStatusTimer = setTimeout(() => {
+                el.style.opacity = '0';
+            }, 1500);
+        }
     }
 
     attachEvents() {
@@ -295,6 +382,7 @@ class AmritaInternalCalculator {
         const minBtn = this.widget.querySelector('#ic-minimize');
         const closeBtn = this.widget.querySelector('#ic-close');
         const themeBtn = this.widget.querySelector('#ic-theme-toggle');
+        const resetBtn = this.widget.querySelector('#ic-reset-weights');
 
         themeBtn.onclick = () => {
             this.theme = this.theme === 'light' ? 'dark' : 'light';
@@ -311,6 +399,10 @@ class AmritaInternalCalculator {
 
         closeBtn.onclick = () => this.widget.remove();
 
+        if (resetBtn) {
+            resetBtn.onclick = () => this.clearSavedWeights();
+        }
+
         this.makeDraggable(header);
         this.attachInputEvents();
     }
@@ -318,17 +410,9 @@ class AmritaInternalCalculator {
     attachInputEvents() {
         const inputs = this.widget.querySelectorAll('.ic-weight-input');
         inputs.forEach(input => {
-            // Click selects all text for easy replacement
-            input.onclick = (e) => {
-                e.target.select();
-            };
+            input.onclick = (e) => e.target.select();
+            input.ondblclick = (e) => e.target.select();
 
-            // Double-click also selects all
-            input.ondblclick = (e) => {
-                e.target.select();
-            };
-
-            // Arrow keys for increment/decrement by 1
             input.onkeydown = (e) => {
                 if (e.key === 'Enter') {
                     e.target.blur();
@@ -339,27 +423,23 @@ class AmritaInternalCalculator {
 
                 if (e.key === 'ArrowUp') {
                     e.preventDefault();
-                    const newVal = currentVal + 1;
-                    e.target.value = newVal;
+                    e.target.value = currentVal + 1;
                     e.target.dispatchEvent(new Event('input'));
                     return;
                 }
 
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
-                    const newVal = Math.max(0, currentVal - 1);
-                    e.target.value = newVal;
+                    e.target.value = Math.max(0, currentVal - 1);
                     e.target.dispatchEvent(new Event('input'));
                     return;
                 }
 
-                // Only allow: digits, decimal point, backspace, delete, tab, arrow left/right, home, end
                 const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', '.'];
                 if (!allowed.includes(e.key) && !/^[0-9]$/.test(e.key)) {
                     e.preventDefault();
                 }
 
-                // Prevent multiple decimals
                 if (e.key === '.' && e.target.value.includes('.')) {
                     e.preventDefault();
                 }
@@ -368,9 +448,10 @@ class AmritaInternalCalculator {
             input.oninput = (e) => {
                 const subCode = e.target.dataset.sub;
                 const compId = e.target.dataset.compId;
+                const examName = e.target.dataset.exam;
+                const componentName = e.target.dataset.component;
 
                 const rawValue = e.target.value;
-                // Allow empty during typing, treat as 0 for calc
                 const newWeight = rawValue === '' ? 0 : (parseFloat(rawValue) || 0);
 
                 const sub = this.subjects[subCode];
@@ -380,7 +461,18 @@ class AmritaInternalCalculator {
                 if (comp) {
                     comp.weight = newWeight;
 
-                    // Update ONLY the specific score display and the total
+                    // Save to persistent storage (subject-specific)
+                    const wKey = this._weightKey(subCode, examName, componentName);
+                    this.savedWeights[wKey] = newWeight;
+                    this.saveWeightsToStorage();
+
+                    // Mark input as saved
+                    e.target.classList.add('ic-weight-saved');
+
+                    // Show save indicator
+                    this.showSaveStatus('✓ Weights auto-saved');
+
+                    // Update score display
                     const rowScore = (comp.obtained / comp.maxMarks) * newWeight;
                     const scoreElem = this.widget.querySelector(`.ic-comp-score[data-comp-id="${compId}"]`);
                     if (scoreElem) scoreElem.textContent = rowScore.toFixed(2);
@@ -400,6 +492,8 @@ class AmritaInternalCalculator {
             };
         });
     }
+
+    // ─── Draggable ────────────────────────────────────────────
 
     makeDraggable(header) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
