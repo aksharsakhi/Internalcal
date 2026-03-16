@@ -9,13 +9,15 @@
         "tabs"
     ],
     "host_permissions": [
-        "https://students.amrita.edu/*"
+        "https://students.amrita.edu/*",
+        "https://aumscb.amrita.edu/*"
     ],
     "content_scripts": [
         {
             "matches": [
                 "https://students.amrita.edu/client/marks*",
-                "https://students.amrita.edu/client/mark*"
+                "https://students.amrita.edu/client/mark*",
+                "https://aumscb.amrita.edu/*"
             ],
             "js": [
                 "content.js"
