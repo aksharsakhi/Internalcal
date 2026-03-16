@@ -94,9 +94,7 @@ No more manual spreadsheets. No more guessing your internals. Just open the port
 
 1. Visit the [Chrome Web Store](https://chromewebstore.google.com/) and search for **InternalCalc**.
 2. Click **"Add to Chrome"**.
-3. Navigate to the Amrita Marks Page:
-   - Primary: [students.amrita.edu/client/marks](https://students.amrita.edu/client/marks)
-   - Alternative: [aumscb.amrita.edu/aums/...](https://aumscb.amrita.edu/aums/Jsp/Core_Common/index.jsp?task=off)
+3. Navigate to the [Amrita Student Portal — Marks Page](https://students.amrita.edu/client/marks).
 4. The **InternalCalc widget** will appear automatically! 🎉
 
 ---
