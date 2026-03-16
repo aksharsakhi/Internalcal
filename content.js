@@ -54,7 +54,8 @@ class AmritaInternalCalculator {
 
                 if (mutation.type === 'childList') {
                     const table = document.querySelector('table');
-                    if (table && table.innerText.includes('Marks Obtained')) {
+                    const text = table ? table.innerText : '';
+                    if (table && (text.includes('Marks Obtained') || (text.includes('Exam Name') && text.includes('Exam Type')))) {
                         clearTimeout(this.scrapeTimeout);
                         this.scrapeTimeout = setTimeout(() => {
                             const activeEl = document.activeElement;
@@ -195,8 +196,15 @@ class AmritaInternalCalculator {
             const maxAttempts = 20;
 
             const check = () => {
-                const rows = document.querySelectorAll('table tr');
-                if (rows.length > 2) {
+                const tables = document.querySelectorAll('table');
+                let hasValidTable = false;
+                for (const t of tables) {
+                    if (t.innerText.includes('Marks Obtained') || (t.innerText.includes('Exam Name') && t.innerText.includes('Exam Type'))) {
+                        hasValidTable = true;
+                        break;
+                    }
+                }
+                if (hasValidTable) {
                     resolve();
                 } else if (attempts < maxAttempts) {
                     attempts++;
@@ -213,7 +221,23 @@ class AmritaInternalCalculator {
     // ─── Scraping ─────────────────────────────────────────────
 
     scrapeMarks() {
-        const table = document.querySelector('table');
+        const isAums = window.location.hostname.includes('aumscb');
+        if (isAums) {
+            this.scrapeAumsMarks();
+        } else {
+            this.scrapeClientMarks();
+        }
+    }
+
+    scrapeClientMarks() {
+        const tables = document.querySelectorAll('table');
+        let table = null;
+        for (const t of tables) {
+            if (t.innerText.includes('Marks Obtained')) {
+                table = t;
+                break;
+            }
+        }
         if (!table) return;
 
         const rows = table.querySelectorAll('tr');
@@ -227,7 +251,9 @@ class AmritaInternalCalculator {
 
             const courseName = cells[0].textContent.trim();
             const courseCode = cells[1].textContent.trim();
-            const obtained = parseFloat(cells[2].textContent.trim()) || 0;
+            const obtainedText = cells[2].textContent.trim();
+            if (obtainedText === 'NP' || obtainedText === '') return;
+            const obtained = parseFloat(obtainedText) || 0;
             const maxMarks = parseFloat(cells[3].textContent.trim()) || 0;
             const componentName = cells[4].textContent.trim();
             const examName = cells[5].textContent.trim();
@@ -240,7 +266,6 @@ class AmritaInternalCalculator {
                 };
             }
 
-            // Default weight logic
             let defaultWeight = maxMarks;
             const lowerExam = examName.toLowerCase();
             const lowerComp = componentName.toLowerCase();
@@ -251,13 +276,10 @@ class AmritaInternalCalculator {
                 defaultWeight = 5;
             }
 
-            // 1st priority: SAVED weight from storage (persists across reload)
             const wKey = this._weightKey(courseCode, examName, componentName);
             if (this.savedWeights[wKey] !== undefined) {
                 defaultWeight = this.savedWeights[wKey];
-            }
-            // 2nd priority: Weight already in memory from current session
-            else {
+            } else {
                 const existingSub = this.subjects[courseCode];
                 if (existingSub) {
                     const existingComp = existingSub.components.find(c =>
@@ -270,7 +292,7 @@ class AmritaInternalCalculator {
             }
 
             newSubjects[courseCode].components.push({
-                id: `${courseCode}-${index}`,
+                id: `client-${courseCode}-${index}`,
                 examName,
                 componentName,
                 obtained,
@@ -278,6 +300,130 @@ class AmritaInternalCalculator {
                 weight: defaultWeight
             });
         });
+
+        this.subjects = newSubjects;
+    }
+
+    scrapeAumsMarks() {
+        const tables = document.querySelectorAll('table');
+        let table = null;
+        for (const t of tables) {
+            if (t.innerText.includes('Exam Name') && t.innerText.includes('Exam Type')) {
+                table = t;
+                break;
+            }
+        }
+        if (!table) return;
+
+        const rows = Array.from(table.querySelectorAll('tr'));
+        let headerRowIdx = -1;
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].innerText.includes('Exam Name') && rows[i].innerText.includes('Exam Type')) {
+                headerRowIdx = i;
+                break;
+            }
+        }
+        if (headerRowIdx === -1) return;
+
+        const headerRow = rows[headerRowIdx];
+        const headers = Array.from(headerRow.querySelectorAll('th, td')).map(cell => cell.textContent.trim());
+
+        let courseStartIndex = headers.indexOf('Exam Type') + 1;
+        if (courseStartIndex === 0 || courseStartIndex >= headers.length) return;
+
+        const courses = [];
+        for (let i = courseStartIndex; i < headers.length; i++) {
+            const code = headers[i];
+            if (code) {
+                courses.push({ index: i, code: code });
+            }
+        }
+
+        const newSubjects = {};
+        courses.forEach(c => {
+            newSubjects[c.code] = {
+                name: c.code,
+                code: c.code,
+                components: []
+            };
+        });
+
+        let compCounter = 0;
+        for (let i = headerRowIdx + 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = Array.from(row.querySelectorAll('td, th'));
+            if (cells.length < courseStartIndex) continue;
+
+            const examName = cells[0].textContent.trim();
+            const componentName = examName;
+
+            courses.forEach(c => {
+                const cell = cells[c.index];
+                if (!cell) return;
+
+                const valText = cell.textContent.trim();
+                if (valText && valText !== 'NP') {
+                    const obtained = parseFloat(valText);
+                    if (!isNaN(obtained)) {
+
+                        let defaultMax = 100;
+                        let defaultWeight = 100;
+                        const lowerExam = examName.toLowerCase();
+
+                        if (lowerExam.includes('mid term') || lowerExam.includes('mid-term')) {
+                            defaultMax = 50;
+                            defaultWeight = 20;
+                        } else if (lowerExam.includes('quiz')) {
+                            defaultMax = 20;
+                            defaultWeight = 5;
+                        } else if (lowerExam.includes('assignment')) {
+                            defaultMax = 15;
+                            defaultWeight = 15;
+                        } else if (lowerExam.includes('lab evaluation')) {
+                            defaultMax = 30;
+                            defaultWeight = 30;
+                        } else if (lowerExam.includes('project')) {
+                            defaultMax = 100;
+                            defaultWeight = 100;
+                        } else {
+                            defaultMax = obtained > 0 ? (Math.ceil(obtained / 10) * 10) : 10;
+                            if (defaultMax < obtained) defaultMax = obtained;
+                            defaultWeight = defaultMax;
+                        }
+
+                        const wKey = this._weightKey(c.code, examName, componentName);
+                        if (this.savedWeights[wKey] !== undefined) {
+                            defaultWeight = this.savedWeights[wKey];
+                        } else {
+                            const existingSub = this.subjects[c.code];
+                            if (existingSub) {
+                                const existingComp = existingSub.components.find(comp =>
+                                    comp.examName === examName && comp.componentName === componentName
+                                );
+                                if (existingComp && existingComp.weight !== undefined) {
+                                    defaultWeight = existingComp.weight;
+                                }
+                            }
+                        }
+
+                        newSubjects[c.code].components.push({
+                            id: `aums-${c.code}-${compCounter++}`,
+                            examName,
+                            componentName,
+                            obtained,
+                            maxMarks: defaultMax,
+                            weight: defaultWeight
+                        });
+                    }
+                }
+            });
+        }
+
+        for (const code in newSubjects) {
+            if (newSubjects[code].components.length === 0) {
+                delete newSubjects[code];
+            }
+        }
 
         this.subjects = newSubjects;
     }
