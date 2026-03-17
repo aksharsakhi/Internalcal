@@ -145,7 +145,6 @@ InternalCalc/
 |-----------|----------------|
 | `activeTab` | To access the current tab's content |
 | `storage` | To save weights and theme preferences |
-| `tabs` | To manage tabs from the popup |
 | `host_permissions: students.amrita.edu` | To run the content script on the portal |
 
 ---

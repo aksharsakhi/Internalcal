@@ -5,8 +5,7 @@
     "description": "Smart internal marks calculator for Amrita students—instantly calculates weighted totals.",
     "permissions": [
         "activeTab",
-        "storage",
-        "tabs"
+        "storage"
     ],
     "host_permissions": [
         "https://students.amrita.edu/*"
